@@ -8,6 +8,7 @@ from services.config.workout_config import EXERCISE_OPTIONS
 from services.ui.style_loader import load_css, inject_local_font, inject_webrtc_styles
 from services.persistence.exercise_repository import init_db
 from streamlit_webrtc import webrtc_streamer, WebRtcMode
+from services.vision.exercise_video_processor import VideoProcessorClass
 
 def main():
     st.set_page_config(
@@ -56,27 +57,27 @@ def main():
                 st.rerun()
 
         else:
-            exercise = st.session_state.get("exercise_type")
-            sets = st.session_state.get("target_sets")
-            reps = st.session_state.get("reps_per_set")
+            exercise = st.session_state.get("plan_exercise")
+            sets = st.session_state.get("plan_sets")
+            reps = st.session_state.get("plan_reps")
 
             st.info(f"**{exercise}** -- {sets} Sets / {reps} Reps")
 
             end_session_button = st.button("End Workout", key="end_session_button", width="stretch")
 
             if end_session_button:
-                st.session_state.workout_started = False
-                
+                st.session_state["workout_started"] = False
+                st.rerun()
 
         if workout_started:
             st.divider()
 
-            exercise = st.session_state.get("exercise_type")
+            exercise = st.session_state.get("plan_exercise")
             total_reps = st.session_state.get("reps")
             current_set_reps = st.session_state.get("current_set_reps")
-            reps_per_set = st.session_state.get("reps_per_set")
+            reps_per_set = st.session_state.get("plan_reps")
             sets_completed = st.session_state.get("sets_completed")
-            target_sets = st.session_state.get("target_sets")
+            target_sets = st.session_state.get("plan_sets")
 
             st.subheader("Progress")
 
@@ -145,7 +146,7 @@ def main():
         context = webrtc_streamer(
             key="exercise-analysis",
             mode=WebRtcMode.SENDRECV,
-            video_processor_factory=None,
+            video_processor_factory=VideoProcessorClass,
             rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
             media_stream_constraints={
                 "video": True,
@@ -154,9 +155,11 @@ def main():
             async_processing=True
         )
 
+        
+        inject_webrtc_styles()
+
     st.markdown("#### Workout History")
 
-    inject_webrtc_styles()
 
 if __name__ == "__main__":
     main()
