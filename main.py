@@ -12,12 +12,15 @@ from services.vision.exercise_video_processor import VideoProcessorClass
 from services.tracking.metrics import sync_metrics_update
 from services.persistence.exercise_repository import get_users_exercises
 from groq import Groq
+from dotenv import load_dotenv
 from services.coaching.llm import LLMCoach
 from services.coaching.tts import TextToSpeech
 from services.coaching.voice_pipeline import VoicePipeline, autoplay_audio
 
 
 def main():
+    load_dotenv()
+
     st.set_page_config(
         page_icon="🏋️‍♀️",
         page_title="AI Real-time GYM Coach",
@@ -47,6 +50,7 @@ def main():
             tts = TextToSpeech()
             st.session_state.voice_pipeline = VoicePipeline(llm_coach, tts)
         except Exception as e:
+            st.error(f"Voice Pipeline Error: {e}")
             st.session_state.voice_pipeline = None
 
     workout_started = st.session_state.get("workout_started", False)
