@@ -75,19 +75,19 @@ def add_exercise(user_id, exercise_name, reps, sets, time):
         existing = conn.execute("""
             SELECT * FROM exercises 
             WHERE user_id = ? AND exercise_name = ? AND Date('created_at') = Date('now')
-        """, (user_id, exercise_name)).fetchone()
+            """, (user_id, exercise_name)).fetchone()
 
         if existing:
             conn.execute("""
                 UPDATE exercises 
                 SET reps = reps + ?, sets = sets + ?, time = time + ?
                 WHERE id = ?
-            """, (reps, sets, time, existing['id']))
+                """, (reps, sets, time, existing['id']))
         else:
             conn.execute("""
                 INSERT INTO exercises (user_id, exercise_name, sets, reps, time)
                 VALUES (?, ?, ?, ?, ?)
-            """, (user_id, exercise_name, sets, reps, time))
+                """, (user_id, exercise_name, sets, reps, time))
 
 
 def get_users_exercises(user_id):
